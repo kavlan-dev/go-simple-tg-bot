@@ -53,19 +53,34 @@ go-simple-tg-bot/
 
 ### Запуск
 
-Есть два способа запуска бота:
+Бот использует файл конфигурации `config/config.json` для настройки. Вы также можете указать собственный путь до файла конфигурации с помощью флага `-p`.
 
-#### Способ 1: Использование переменной окружения
+#### Способ 1: Использование файла конфигурации (рекомендуется)
+
+1. Создайте файл `config/config.json` на основе примера:
+   ```bash
+   cp config/config.example.json config/config.json
+   ```
+
+2. Отредактируйте файл `config/config.json` и укажите ваш токен:
+   ```json
+   {
+       "env": "local",
+       "token": "your_telegram_bot_token"
+   }
+   ```
+
+3. Запустите бота:
+   ```bash
+   go run cmd/bot/main.go
+   ```
+
+#### Способ 2: Использование пользовательского пути до конфигурации
+
+Вы можете указать собственный путь до файла конфигурации с помощью флага `-p`:
 
 ```bash
-export TOKEN=your_telegram_bot_token
-go run cmd/bot/main.go
-```
-
-#### Способ 2: Использование флага командной строки
-
-```bash
-go run cmd/bot/main.go -t your_telegram_bot_token
+go run cmd/bot/main.go -p path/to/your/config.json
 ```
 
 ## Архитектура

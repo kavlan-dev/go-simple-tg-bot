@@ -2,16 +2,22 @@ package main
 
 import (
 	"go-simple-tg-bot/internal/clients"
+	"go-simple-tg-bot/internal/config"
 	"go-simple-tg-bot/internal/handlers"
 	"go-simple-tg-bot/internal/utils"
+	"log"
 	"log/slog"
 	"time"
 )
 
 func main() {
-	tgClient := clients.New("api.telegram.org", utils.MustToken())
+	cfg, err := config.New()
+	if err != nil {
+		log.Fatalln("Не удалось загрузить файл конфигураций", err)
+	}
 
-	log := utils.InitLogger()
+	tgClient := clients.New("api.telegram.org", cfg.Token)
+	log := utils.InitLogger(cfg.Env)
 
 	handler := handlers.New(tgClient, log)
 
