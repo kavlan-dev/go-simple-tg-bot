@@ -8,8 +8,8 @@ import (
 )
 
 type Config struct {
-	Env   string `json:"env,omitempty"`
-	Token string `json:"token,omitempty"`
+	Env   string `json:"env"`
+	Token string `json:"token"`
 }
 
 func New() (*Config, error) {
