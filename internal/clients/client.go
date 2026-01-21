@@ -1,13 +1,16 @@
 package clients
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"go-simple-tg-bot/internal/models"
 	"io"
 	"net/http"
 	"net/url"
 	"path"
 	"strconv"
+	"time"
 )
 
 type Client struct {
@@ -24,12 +27,12 @@ func New(host, token string) *Client {
 	}
 }
 
-func (c *Client) Updates(offset, limit int) ([]models.Update, error) {
+func (c *Client) Updates(ctx context.Context, offset, limit int) ([]models.Update, error) {
 	q := url.Values{}
 	q.Add("offset", strconv.Itoa(offset))
 	q.Add("limit", strconv.Itoa(limit))
 
-	data, err := c.doRequest("getUpdates", q)
+	data, err := c.doRequest(ctx, "getUpdates", q)
 	if err != nil {
 		return nil, err
 	}
@@ -42,12 +45,12 @@ func (c *Client) Updates(offset, limit int) ([]models.Update, error) {
 	return res.Result, nil
 }
 
-func (c *Client) SendMessage(chatID int, text string) error {
+func (c *Client) SendMessage(ctx context.Context, chatID int, text string) error {
 	q := url.Values{}
 	q.Add("chat_id", strconv.Itoa(chatID))
 	q.Add("text", text)
 
-	_, err := c.doRequest("sendMessage", q)
+	_, err := c.doRequest(ctx, "sendMessage", q)
 	if err != nil {
 		return err
 	}
@@ -55,7 +58,7 @@ func (c *Client) SendMessage(chatID int, text string) error {
 	return nil
 }
 
-func (c *Client) SendPhotoByURL(chatID int, photoURL, caption string) error {
+func (c *Client) SendPhotoByURL(ctx context.Context, chatID int, photoURL, caption string) error {
 	q := url.Values{}
 	q.Add("chat_id", strconv.Itoa(chatID))
 	q.Add("photo", photoURL)
@@ -63,7 +66,7 @@ func (c *Client) SendPhotoByURL(chatID int, photoURL, caption string) error {
 		q.Add("caption", caption)
 	}
 
-	_, err := c.doRequest("sendPhoto", q)
+	_, err := c.doRequest(ctx, "sendPhoto", q)
 	if err != nil {
 		return err
 	}
@@ -71,16 +74,23 @@ func (c *Client) SendPhotoByURL(chatID int, photoURL, caption string) error {
 	return nil
 }
 
-func (c *Client) doRequest(method string, query url.Values) ([]byte, error) {
+func (c *Client) doRequest(ctx context.Context, method string, query url.Values) ([]byte, error) {
 	u := url.URL{
 		Scheme: "https",
 		Host:   c.host,
 		Path:   path.Join(c.basePath, method),
 	}
 
-	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, err
+	}
+
+	if req.Response.StatusCode != 200 {
+		return nil, fmt.Errorf("Метод %s вернул код статус %d", method, req.Response.StatusCode)
 	}
 
 	req.URL.RawQuery = query.Encode()
