@@ -40,5 +40,9 @@ func configFile(path string) (*Config, error) {
 		return nil, fmt.Errorf("Токен не указан")
 	}
 
+	if cfg.Env == "" {
+		return nil, fmt.Errorf("Env не указан")
+	}
+
 	return &cfg, nil
 }

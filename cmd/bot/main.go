@@ -23,8 +23,12 @@ func main() {
 	}
 
 	tgClient := clients.New("api.telegram.org", cfg.Token)
-	log := utils.InitLogger(cfg.Env)
-	handler := handlers.New(tgClient, log)
+	if tgClient == nil {
+		log.Fatalln("Не удалось создать Telegram клиент")
+	}
+
+	logger := utils.InitLogger(cfg.Env)
+	handler := handlers.New(tgClient, logger)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -38,7 +42,7 @@ func main() {
 
 	go func() {
 		<-sigChan
-		log.Info("Получен сигнал завершения, начинаем плавное завершение...")
+		logger.Info("Получен сигнал завершения, начинаем плавное завершение...")
 		cancel()
 	}()
 
@@ -50,13 +54,13 @@ func main() {
 		default:
 			updates, err := tgClient.Updates(ctx, offset, 0)
 			if err != nil {
-				log.Info("Ошибка получения обновлений", utils.Err(err))
+				logger.Error("Ошибка получения обновлений", utils.Err(err))
 				time.Sleep(1 * time.Second)
 				continue
 			}
 
 			for _, update := range updates {
-				log.Info("Новый запрос", slog.Any("message", *update.Message))
+				logger.Info("Новый запрос", slog.Any("message", *update.Message))
 				wg.Add(1)
 				go func(u models.Update) {
 					defer wg.Done()

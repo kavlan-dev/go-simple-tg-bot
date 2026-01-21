@@ -42,6 +42,10 @@ func (c *Client) Updates(ctx context.Context, offset, limit int) ([]models.Updat
 		return nil, err
 	}
 
+	if !res.Ok {
+		return nil, fmt.Errorf("Telegram API вернул ok=false")
+	}
+
 	return res.Result, nil
 }
 
@@ -89,10 +93,6 @@ func (c *Client) doRequest(ctx context.Context, method string, query url.Values)
 		return nil, err
 	}
 
-	if req.Response.StatusCode != 200 {
-		return nil, fmt.Errorf("Метод %s вернул код статус %d", method, req.Response.StatusCode)
-	}
-
 	req.URL.RawQuery = query.Encode()
 
 	resp, err := c.client.Do(req)
@@ -100,6 +100,10 @@ func (c *Client) doRequest(ctx context.Context, method string, query url.Values)
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Метод %s вернул код статус %d", method, resp.StatusCode)
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
