@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"go-simple-tg-bot/internal/clients"
 	"go-simple-tg-bot/internal/models"
 	"go-simple-tg-bot/internal/utils"
 	"io"
@@ -19,19 +18,19 @@ type TelegramClient interface {
 	SendPhotoByURL(ctx context.Context, chatID int, photoURL, caption string) error
 }
 
-type Handler struct {
-	bot *clients.Client
+type handler struct {
+	bot TelegramClient
 	log *slog.Logger
 }
 
-func New(bot *clients.Client, log *slog.Logger) *Handler {
-	return &Handler{
+func New(bot TelegramClient, log *slog.Logger) *handler {
+	return &handler{
 		bot: bot,
 		log: log,
 	}
 }
 
-func (h *Handler) HandleUpdate(ctx context.Context, update models.Update) {
+func (h *handler) HandleUpdate(ctx context.Context, update models.Update) {
 	if update.Message == nil {
 		return
 	}
@@ -58,7 +57,7 @@ func (h *Handler) HandleUpdate(ctx context.Context, update models.Update) {
 	h.bot.SendMessage(ctx, chatID, "Неизвестная команда. Используйте /help")
 }
 
-func (h *Handler) sendDog(ctx context.Context, chatID int) {
+func (h *handler) sendDog(ctx context.Context, chatID int) {
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 	}

@@ -13,21 +13,21 @@ import (
 	"time"
 )
 
-type Client struct {
+type client struct {
 	host     string
 	basePath string
 	client   http.Client
 }
 
-func New(host, token string) *Client {
-	return &Client{
+func New(host, token string) *client {
+	return &client{
 		host:     host,
 		basePath: "bot" + token,
 		client:   http.Client{},
 	}
 }
 
-func (c *Client) Updates(ctx context.Context, offset, limit int) ([]models.Update, error) {
+func (c *client) Updates(ctx context.Context, offset, limit int) ([]models.Update, error) {
 	q := url.Values{}
 	q.Add("offset", strconv.Itoa(offset))
 	q.Add("limit", strconv.Itoa(limit))
@@ -49,7 +49,7 @@ func (c *Client) Updates(ctx context.Context, offset, limit int) ([]models.Updat
 	return res.Result, nil
 }
 
-func (c *Client) SendMessage(ctx context.Context, chatID int, text string) error {
+func (c *client) SendMessage(ctx context.Context, chatID int, text string) error {
 	q := url.Values{}
 	q.Add("chat_id", strconv.Itoa(chatID))
 	q.Add("text", text)
@@ -62,7 +62,7 @@ func (c *Client) SendMessage(ctx context.Context, chatID int, text string) error
 	return nil
 }
 
-func (c *Client) SendPhotoByURL(ctx context.Context, chatID int, photoURL, caption string) error {
+func (c *client) SendPhotoByURL(ctx context.Context, chatID int, photoURL, caption string) error {
 	q := url.Values{}
 	q.Add("chat_id", strconv.Itoa(chatID))
 	q.Add("photo", photoURL)
@@ -78,7 +78,7 @@ func (c *Client) SendPhotoByURL(ctx context.Context, chatID int, photoURL, capti
 	return nil
 }
 
-func (c *Client) doRequest(ctx context.Context, method string, query url.Values) ([]byte, error) {
+func (c *client) doRequest(ctx context.Context, method string, query url.Values) ([]byte, error) {
 	u := url.URL{
 		Scheme: "https",
 		Host:   c.host,

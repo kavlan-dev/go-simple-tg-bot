@@ -7,12 +7,12 @@ import (
 	"os"
 )
 
-type Config struct {
+type config struct {
 	Env   string `json:"env"`
 	Token string `json:"token"`
 }
 
-func New() (*Config, error) {
+func New() (*config, error) {
 	pathCmd := flag.String(
 		"p",
 		"config/config.json",
@@ -24,14 +24,14 @@ func New() (*Config, error) {
 	return configFile(*pathCmd)
 }
 
-func configFile(path string) (*Config, error) {
+func configFile(path string) (*config, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	var cfg Config
+	var cfg config
 	if err := json.NewDecoder(file).Decode(&cfg); err != nil {
 		return nil, err
 	}
