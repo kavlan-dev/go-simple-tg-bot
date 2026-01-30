@@ -12,7 +12,7 @@ type config struct {
 	Token string `json:"token"`
 }
 
-func New() (*config, error) {
+func InitConfig() (*config, error) {
 	pathCmd := flag.String(
 		"p",
 		"config/config.json",

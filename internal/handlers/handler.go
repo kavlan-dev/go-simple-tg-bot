@@ -12,18 +12,18 @@ import (
 	"time"
 )
 
-type TelegramClient interface {
+type telegramClient interface {
 	Updates(ctx context.Context, offset, limit int) ([]models.Update, error)
 	SendMessage(ctx context.Context, chatID int, text string) error
 	SendPhotoByURL(ctx context.Context, chatID int, photoURL, caption string) error
 }
 
 type handler struct {
-	bot TelegramClient
+	bot telegramClient
 	log *slog.Logger
 }
 
-func New(bot TelegramClient, log *slog.Logger) *handler {
+func New(bot telegramClient, log *slog.Logger) *handler {
 	return &handler{
 		bot: bot,
 		log: log,
