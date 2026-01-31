@@ -1,10 +1,10 @@
-package clients
+package client
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"go-simple-tg-bot/internal/models"
+	"go-simple-tg-bot/internal/model"
 	"io"
 	"net/http"
 	"net/url"
@@ -27,7 +27,7 @@ func NewClient(host, token string) *client {
 	}
 }
 
-func (c *client) Updates(ctx context.Context, offset, limit int) ([]models.Update, error) {
+func (c *client) Updates(ctx context.Context, offset, limit int) ([]model.Update, error) {
 	q := url.Values{}
 	q.Add("offset", strconv.Itoa(offset))
 	q.Add("limit", strconv.Itoa(limit))
@@ -37,7 +37,7 @@ func (c *client) Updates(ctx context.Context, offset, limit int) ([]models.Updat
 		return nil, err
 	}
 
-	var res models.UpdatesResponse
+	var res model.UpdatesResponse
 	if err := json.Unmarshal(data, &res); err != nil {
 		return nil, err
 	}

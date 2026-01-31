@@ -1,4 +1,4 @@
-package models
+package model
 
 type UpdatesResponse struct {
 	Ok     bool     `json:"ok"`
