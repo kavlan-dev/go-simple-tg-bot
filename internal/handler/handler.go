@@ -24,7 +24,7 @@ type handler struct {
 	log     *slog.Logger
 }
 
-func New(bot telegramClient, service service, log *slog.Logger) *handler {
+func NewHandler(bot telegramClient, service service, log *slog.Logger) *handler {
 	return &handler{
 		bot:     bot,
 		service: service,

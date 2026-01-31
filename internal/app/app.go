@@ -30,7 +30,7 @@ func Run() {
 
 	logger := util.InitLogger(cfg.Env)
 	service := service.NewService()
-	handler := handler.New(tgClient, service, logger)
+	handler := handler.NewHandler(tgClient, service, logger)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
