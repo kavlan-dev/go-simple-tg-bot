@@ -6,6 +6,7 @@ import (
 	"go-simple-tg-bot/internal/config"
 	"go-simple-tg-bot/internal/handlers"
 	"go-simple-tg-bot/internal/models"
+	"go-simple-tg-bot/internal/service"
 	"go-simple-tg-bot/internal/utils"
 	"log"
 	"log/slog"
@@ -28,7 +29,8 @@ func Run() {
 	}
 
 	logger := utils.InitLogger(cfg.Env)
-	handler := handlers.New(tgClient, logger)
+	service := service.NewService()
+	handler := handlers.New(tgClient, service, logger)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

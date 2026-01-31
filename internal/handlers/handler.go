@@ -2,14 +2,10 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
 	"go-simple-tg-bot/internal/models"
 	"go-simple-tg-bot/internal/utils"
-	"io"
 	"log/slog"
-	"net/http"
 	"strings"
-	"time"
 )
 
 type telegramClient interface {
@@ -18,15 +14,21 @@ type telegramClient interface {
 	SendPhotoByURL(ctx context.Context, chatID int, photoURL, caption string) error
 }
 
-type handler struct {
-	bot telegramClient
-	log *slog.Logger
+type service interface {
+	DogImage(ctx context.Context) (string, error)
 }
 
-func New(bot telegramClient, log *slog.Logger) *handler {
+type handler struct {
+	bot     telegramClient
+	service service
+	log     *slog.Logger
+}
+
+func New(bot telegramClient, service service, log *slog.Logger) *handler {
 	return &handler{
-		bot: bot,
-		log: log,
+		bot:     bot,
+		service: service,
+		log:     log,
 	}
 }
 
@@ -58,58 +60,13 @@ func (h *handler) HandleUpdate(ctx context.Context, update models.Update) {
 }
 
 func (h *handler) sendDog(ctx context.Context, chatID int) {
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://random.dog/woof.json", nil)
+	url, err := h.service.DogImage(ctx)
 	if err != nil {
-		h.log.Info("Ошибка создания запроса", utils.Err(err))
-		h.bot.SendMessage(ctx, chatID, "Не удалось создать запрос. Попробуйте позже.")
-		return
+		h.log.Info("Ошибка при получении ссылки с фотографией", utils.Err(err))
+		h.bot.SendMessage(ctx, chatID, "Неизвестная команда. Используйте /help")
 	}
 
-	resp, err := client.Do(req)
-	if err != nil {
-		h.log.Info("Ошибка при получении ответа", utils.Err(err))
-		h.bot.SendMessage(ctx, chatID, "Не удалось получить фотографию собаки. Попробуйте позже.")
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		h.log.Info("Неожиданный статус код от API", slog.Int("status_code", resp.StatusCode))
-		h.bot.SendMessage(ctx, chatID, "Сервис временно недоступен. Попробуйте позже.")
-		return
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		h.log.Info("Ошибка при чтении тела ответа", utils.Err(err))
-		h.bot.SendMessage(ctx, chatID, "Ошибка при обработке данных. Попробуйте позже.")
-		return
-	}
-
-	type randomDogResponse struct {
-		URL string `json:"url"`
-	}
-
-	var dogData randomDogResponse
-	err = json.Unmarshal(body, &dogData)
-	if err != nil {
-		h.log.Info("Не удалось обработать ответ", utils.Err(err))
-		h.bot.SendMessage(ctx, chatID, "Ошибка формата данных. Попробуйте позже.")
-		return
-	}
-
-	if dogData.URL == "" {
-		h.log.Info("Получен пустой URL фотографии")
-		h.bot.SendMessage(ctx, chatID, "Не удалось получить фотографию собаки. Попробуйте позже.")
-		return
-	}
-
-	err = h.bot.SendPhotoByURL(ctx, chatID, dogData.URL, "")
-	if err != nil {
+	if err := h.bot.SendPhotoByURL(ctx, chatID, url, ""); err != nil {
 		h.log.Info("Ошибка при отправке сообщения пользователю", slog.Int("chat_id", chatID), utils.Err(err))
 		h.bot.SendMessage(ctx, chatID, "Ошибка при отправке фотографии. Попробуйте позже.")
 	}
