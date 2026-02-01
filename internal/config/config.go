@@ -1,48 +1,31 @@
 package config
 
 import (
-	"encoding/json"
-	"flag"
 	"fmt"
 	"os"
 )
 
 type config struct {
-	Env   string `json:"env"`
-	Token string `json:"token"`
+	Env   string
+	Token string
 }
 
 func InitConfig() (*config, error) {
-	pathCmd := flag.String(
-		"p",
-		"config/config.json",
-		"Введите относительный путь до файла конфигурации",
-	)
-
-	flag.Parse()
-
-	return configFile(*pathCmd)
-}
-
-func configFile(path string) (*config, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var cfg config
-	if err := json.NewDecoder(file).Decode(&cfg); err != nil {
-		return nil, err
-	}
-
-	if cfg.Token == "" {
+	var config config
+	config.Env = envOrDefault("ENV", "prod")
+	config.Token = os.Getenv("TOKEN")
+	if config.Token == "" {
 		return nil, fmt.Errorf("Токен не указан")
 	}
 
-	if cfg.Env == "" {
-		return nil, fmt.Errorf("Env не указан")
+	return &config, nil
+}
+
+func envOrDefault(varName string, defaultValue string) string {
+	value := os.Getenv(varName)
+	if value == "" {
+		value = defaultValue
 	}
 
-	return &cfg, nil
+	return value
 }

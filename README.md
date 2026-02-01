@@ -13,22 +13,28 @@
 
 ## Структура проекта
 
+Проект имеет следующую структуру:
+
 ```
 go-simple-tg-bot/
 ├── cmd/
 │   └── bot/
-│       └── main.go          # Основной файл запуска бота
+│       └── main.go          # Точка входа приложения
 ├── internal/
-│   ├── clients/
-│   │   └── client.go        # Клиент для работы с Telegram API
-│   ├── handlers/
-│   │   └── handler.go       # Обработчики сообщений
-│   ├── models/
-│   │   └── update.go        # Модели данных
-│   └── utils/
-│       └── token.go         # Утилиты для работы с токенами
-├── go.mod                   # Файл зависимостей
-└── README.md                # Документация
+│   ├── app/                 # Основная логика приложения
+│   │   └── app.go           # Инициализация и запуск бота
+│   ├── clients/             # Внешние клиенты
+│   │   └── client.go        # Клиент для Telegram API
+│   ├── handlers/           # Обработчики команд
+│   │   └── handler.go       # Обработка входящих сообщений
+│   ├── models/              # Модели данных
+│   │   └── update.go        # Структуры для работы с API
+│   ├── services/            # Сервисный слой
+│   │   └── dog_service.go   # Сервис для работы с API собак
+│   └── utils/               # Вспомогательные утилиты
+│       └── token.go         # Работа с токеном
+├── go.mod                   # Файл зависимостей Go
+└── go.sum                   # Контрольные суммы зависимостей
 ```
 
 ## Установка и запуск
@@ -53,44 +59,29 @@ go-simple-tg-bot/
 
 ### Запуск
 
-Бот использует файл конфигурации `config/config.json` для настройки. Вы также можете указать собственный путь до файла конфигурации с помощью флага `-p`.
-
-#### Способ 1: Использование файла конфигурации (рекомендуется)
-
-1. Создайте файл `config/config.json` на основе примера:
+1. Установите переменные окружения:
    ```bash
-   cp config/config.example.json config/config.json
+   export ENV=dev  # Опционально, по умолчанию prod
+   export TOKEN=your_telegram_bot_token_here
    ```
 
-2. Отредактируйте файл `config/config.json` и укажите ваш токен:
-   ```json
-   {
-       "env": "local",
-       "token": "your_telegram_bot_token"
-   }
-   ```
-
-3. Запустите бота:
+2. Запустите бота:
    ```bash
    go run cmd/bot/main.go
    ```
 
-#### Способ 2: Использование пользовательского пути до конфигурации
-
-Вы можете указать собственный путь до файла конфигурации с помощью флага `-p`:
-
-```bash
-go run cmd/bot/main.go -p path/to/your/config.json
-```
+   Примечание: Переменная `TOKEN` обязательна для запуска. Если она не установлена, приложение завершит работу с ошибкой.
 
 ## Архитектура
 
 Проект следует принципам чистой архитектуры и разделения ответственности:
 
-1. **Client** (`internal/clients/client.go`): Отвечает за взаимодействие с Telegram API
-2. **Handler** (`internal/handlers/handler.go`): Обрабатывает входящие сообщения и команды
-3. **Models** (`internal/models/update.go`): Содержит структуры данных для работы с API
-4. **Utils** (`internal/utils/token.go`): Вспомогательные функции
+1. **App** (`internal/app/app.go`): Инициализация и запуск бота
+2. **Client** (`internal/clients/client.go`): Отвечает за взаимодействие с Telegram API
+3. **Handler** (`internal/handlers/handler.go`): Обрабатывает входящие сообщения и команды
+4. **Models** (`internal/models/update.go`): Содержит структуры данных для работы с API
+5. **Service** (`internal/services/dog_service.go`): Сервисы
+6. **Utils** (`internal/utils/token.go`): Вспомогательные функции
 
 ## Команды бота
 

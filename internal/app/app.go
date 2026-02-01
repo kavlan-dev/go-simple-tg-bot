@@ -20,7 +20,7 @@ import (
 func Run() {
 	cfg, err := config.InitConfig()
 	if err != nil {
-		log.Fatalln("Не удалось загрузить файл конфигураций", err)
+		log.Fatalln("Не удалось загрузить конфигурации:", err)
 	}
 
 	tgClient := client.NewClient("api.telegram.org", cfg.Token)
@@ -48,6 +48,7 @@ func Run() {
 		cancel()
 	}()
 
+	logger.Info("Бот запущен")
 	for {
 		select {
 		case <-ctx.Done():
