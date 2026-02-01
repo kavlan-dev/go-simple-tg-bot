@@ -61,7 +61,7 @@ go-simple-tg-bot/
 
 1. Установите переменные окружения:
    ```bash
-   export ENV=dev  # Опционально, по умолчанию prod
+   export ENV=dev  # Опционально, по умолчанию prod. Возмжные значения local, dev, prod
    export TOKEN=your_telegram_bot_token_here
    ```
 
@@ -71,6 +71,36 @@ go-simple-tg-bot/
    ```
 
    Примечание: Переменная `TOKEN` обязательна для запуска. Если она не установлена, приложение завершит работу с ошибкой.
+
+### Запуск через Docker
+
+1. Соберите Docker образ:
+   ```bash
+   docker build -t go-simple-tg-bot .
+   ```
+
+2. Запустите контейнер с ботом:
+   ```bash
+   docker run -e TOKEN=your_telegram_bot_token_here -e ENV=dev go-simple-tg-bot
+   ```
+
+3. Для использования Docker Compose:
+   ```bash
+   docker-compose up
+   ```
+
+   Файл `docker-compose.yml` должен содержать:
+   ```yaml
+   version: '3.8'
+
+   services:
+     bot:
+       build: .
+       environment:
+         - TOKEN=your_telegram_bot_token_here
+         - ENV=dev
+       # env_file: .env
+   ```
 
 ## Архитектура
 

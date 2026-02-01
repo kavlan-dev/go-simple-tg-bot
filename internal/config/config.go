@@ -13,6 +13,10 @@ type config struct {
 func InitConfig() (*config, error) {
 	var config config
 	config.Env = envOrDefault("ENV", "prod")
+	if config.Env != "prod" && config.Env != "dev" && config.Env != "local" {
+		return nil, fmt.Errorf("Недопустимое значение ENV")
+	}
+
 	config.Token = os.Getenv("TOKEN")
 	if config.Token == "" {
 		return nil, fmt.Errorf("Токен не указан")
